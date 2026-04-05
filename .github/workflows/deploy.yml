@@ -5,7 +5,7 @@ name: Deploy to Cloudflare
 on:
   # 当有代码推送到 'main' 分支时，自动触发此工作流
   push:
-    branches:
+分支:
       - main
   # 允许你在 GitHub Actions 页面手动点击按钮来触发此工作流
   workflow_dispatch:
@@ -96,3 +96,4 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           # 明确指定要执行的命令是 'deploy'
           command: deploy
+          
