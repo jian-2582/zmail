@@ -1,17 +1,13 @@
 name: Deploy to Cloudflare
 
 on:
-  push:
-分支: [ main ]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -31,30 +27,13 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Configure Wrangler
-        run: |
-          sed -i "s/\${D1_DATABASE_ID}/${D1_DATABASE_ID}/g" wrangler.toml
-          sed -i "s/\${D1_DATABASE_NAME}/${D1_DATABASE_NAME}/g" wrangler.toml
-          sed -i "s/\${VITE_EMAIL_DOMAIN}/${VITE_EMAIL_DOMAIN}/g" wrangler.toml
-        env:
-          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
-          D1_DATABASE_NAME: ${{ secrets.D1_DATABASE_NAME }}
-          VITE_EMAIL_DOMAIN: ${{ secrets.VITE_EMAIL_DOMAIN }}
-
-      - name: Check for Cloudflare credentials
-        id: cf_creds
-        run: |
-          if [ -z "${{ secrets.CF_API_TOKEN }}" ] || [ -z "${{ secrets.CF_ACCOUNT_ID }}" ]; then
-            echo "Cloudflare credentials not found, skipping deployment."
-            echo "has_creds=false" >> $GITHUB_ENV
-          else
-            echo "has_creds=true" >> $GITHUB_ENV
-          fi
-
       - name: Deploy to Cloudflare
-        if: env.has_creds == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: deploy
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          D1_DATABASE_NAME: ${{ secrets.D1_DATABASE_NAME }}
+          VITE_EMAIL_DOMAIN: ${{ secrets.VITE_EMAIL_DOMAIN }}
